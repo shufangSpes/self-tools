@@ -130,14 +130,16 @@
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
+            justify-content: center;
         }
         
         .stat-item {
             text-align: center;
-            padding: 8px 16px;
+            padding: 12px 20px;
             background: rgba(24, 144, 255, 0.1);
-            border-radius: 8px;
+            border-radius: 12px;
             transition: transform 0.2s ease;
+            min-width: 80px;
         }
         
         .stat-item:hover {
@@ -145,14 +147,16 @@
         }
         
         .stat-number {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
             color: #1890ff;
+            margin-bottom: 4px;
         }
         
         .stat-label {
             font-size: 12px;
             color: #666;
+            font-weight: 500;
         }
         
         .controls {
@@ -166,20 +170,22 @@
             gap: 16px;
             flex-wrap: wrap;
             align-items: center;
+            justify-content: center;
         }
         
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             text-decoration: none;
+            white-space: nowrap;
         }
         
         .btn-primary {
@@ -204,18 +210,24 @@
         }
         
         .filter-select {
-            padding: 8px 12px;
+            padding: 10px 14px;
             border: 1px solid #d9d9d9;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             background: white;
             cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: #1890ff;
         }
         
         .books-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
+            gap: 24px;
             margin-bottom: 40px;
         }
         
@@ -223,7 +235,7 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 16px;
-            padding: 20px;
+            padding: 24px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             position: relative;
@@ -239,7 +251,7 @@
             position: absolute;
             top: 16px;
             right: 16px;
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: 500;
@@ -266,7 +278,7 @@
             margin-bottom: 8px;
             color: #333;
             line-height: 1.4;
-            padding-right: 60px;
+            padding-right: 80px;
         }
         
         .book-author {
@@ -290,12 +302,13 @@
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            justify-content: center;
         }
         
         .btn-small {
-            padding: 6px 12px;
+            padding: 8px 16px;
             font-size: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
         }
         
         .modal {
@@ -368,9 +381,9 @@
         
         .form-input {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 16px;
             border: 1px solid #d9d9d9;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 14px;
             transition: border-color 0.3s ease;
         }
@@ -389,23 +402,36 @@
         .form-actions {
             display: flex;
             gap: 12px;
-            justify-content: flex-end;
+            justify-content: center;
             margin-top: 24px;
         }
         
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
             color: #666;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 16px;
             backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         
         .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+        
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
         }
         
         .records-list {
@@ -469,6 +495,10 @@
                 align-items: stretch;
             }
             
+            .controls .btn {
+                justify-content: center;
+            }
+            
             .books-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
@@ -487,6 +517,7 @@
         @media (max-width: 480px) {
             .stats {
                 justify-content: center;
+                width: 100%;
             }
             
             .book-actions {
@@ -574,8 +605,11 @@
         <div class="books-grid" id="booksGrid">
             <div class="empty-state">
                 <div class="empty-icon">📖</div>
-                <p>还没有添加任何书籍</p>
+                <h3>还没有添加任何书籍</h3>
                 <p>点击"添加书籍"开始记录你的阅读之旅吧！</p>
+                <button class="btn btn-primary" onclick="openAddBookModal()">
+                    ➕ 立即添加
+                </button>
             </div>
         </div>
     </main>
@@ -590,11 +624,11 @@
             <form id="addBookForm">
                 <div class="form-group">
                     <label class="form-label">书名 *</label>
-                    <input type="text" class="form-input" id="bookTitle" required>
+                    <input type="text" class="form-input" id="bookTitle" required placeholder="请输入书名">
                 </div>
                 <div class="form-group">
                     <label class="form-label">作者 *</label>
-                    <input type="text" class="form-input" id="bookAuthor" required>
+                    <input type="text" class="form-input" id="bookAuthor" required placeholder="请输入作者">
                 </div>
                 <div class="form-group">
                     <label class="form-label">状态</label>
@@ -606,7 +640,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">简介</label>
-                    <textarea class="form-input form-textarea" id="bookDescription"></textarea>
+                    <textarea class="form-input form-textarea" id="bookDescription" placeholder="请输入书籍简介..."></textarea>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('addBookModal')">取消</button>
