@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书籍详情 - 阅读记录管理</title>
+    <meta name="description" content="查看书籍详细信息">
+    <meta name="theme-color" content="#1e3a8a">
+    
+    <!-- PWA 支持 -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    
+    <!-- 预加载字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* 深色主题 (默认) */
+            --primary-color: #1e3a8a;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e293b;
+            --secondary-color: #64748b;
+            --accent-color: #0ea5e9;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+            --surface-color: rgba(255, 255, 255, 0.1);
+            --surface-hover: rgba(255, 255, 255, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.9);
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            /* 背景渐变 */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
+            --bg-overlay-1: rgba(30, 58, 138, 0.1);
+            --bg-overlay-2: rgba(14, 165, 233, 0.08);
+            --bg-overlay-3: rgba(51, 65, 85, 0.15);
+        }
+        
+        /* 浅色主题 */
+        [data-theme="light"] {
+            --primary-color: #1e40af;
+            --primary-light: #3b82f6;
+            --primary-dark: #1e3a8a;
+            --secondary-color: #6b7280;
+            --accent-color: #0ea5e9;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+            --surface-color: rgba(0, 0, 0, 0.05);
+            --surface-hover: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --text-primary: #1f2937;
+            --text-secondary: #374151;
+            --text-muted: #6b7280;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            
+            /* 浅色背景渐变 */
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%, #f8fafc 100%);
+            --bg-overlay-1: rgba(30, 64, 175, 0.03);
+            --bg-overlay-2: rgba(14, 165, 233, 0.05);
+            --bg-overlay-3: rgba(51, 65, 85, 0.02);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gradient);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, var(--bg-overlay-1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, var(--bg-overlay-2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, var(--bg-overlay-3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            padding: 16px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo::before {
+            content: '📚';
+            font-size: 24px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            padding: 8px 16px;
+            border-radius: 12px;
+        }
+        
+        .nav-links a:hover {
+            background: var(--surface-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 1px;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-links a:hover::after {
+            width: 20px;
+        }
+        
+        /* 主题切换按钮 */
+        .theme-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 60px;
+            height: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--surface-hover);
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .theme-toggle-icon {
+            position: absolute;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        }
+        
+        .theme-toggle-icon.sun {
+            left: 4px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            transform: translateX(0);
+            opacity: 0;
+        }
+        
+        .theme-toggle-icon.moon {
+            right: 4px;
+            background: linear-gradient(135deg, #64748b, #475569);
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        [data-theme="light"] .theme-toggle-icon.sun {
+            transform: translateX(24px);
+            opacity: 1;
+        }
+        
+        [data-theme="light"] .theme-toggle-icon.moon {
+            transform: translateX(-24px);
+            opacity: 0;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        /* 主要内容区域 */
+        .main-content {
+            margin-top: 80px;
+            padding: 40px 24px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .back-button:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .book-detail-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .book-detail-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+        }
+        
+        .book-header {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .book-cover-section {
+            text-align: center;
+        }
+        
+        .book-cover {
+            width: 240px;
+            height: 320px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .book-cover:hover {
+            transform: scale(1.02);
+        }
+        
+        .cover-placeholder {
+            width: 240px;
+            height: 320px;
+            background: linear-gradient(135deg, var(--surface-color), var(--surface-hover));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .book-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .book-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        
+        .book-author {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        .book-status {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+        
+        .status-reading {
+            background: linear-gradient(135deg, var(--warning-color), #b45309);
+            color: white;
+        }
+        
+        .status-finished {
+            background: linear-gradient(135deg, var(--success-color), #047857);
+            color: white;
+        }
+        
+        .status-wishlist {
+            background: linear-gradient(135deg, var(--accent-color), #0369a1);
+            color: white;
+        }
+        
+        .book-rating {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .rating-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .star {
+            font-size: 20px;
+            color: #d97706;
+        }
+        
+        .star.empty {
+            color: var(--text-muted);
+        }
+        
+        .book-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        
+        .meta-item {
+            background: var(--surface-color);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .meta-item:hover {
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+        }
+        
+        .meta-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .meta-value {
+            font-size: 16px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .book-description {
+            background: var(--surface-color);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .description-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        
+        .description-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        
+        .book-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+        
+        .tag {
+            padding: 8px 16px;
+            background: var(--surface-color);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: var(--surface-hover);
+            transform: translateY(-1px);
+        }
+        
+        .book-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-secondary {
+            background: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error-color), #b91c1c);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #b91c1c, var(--error-color));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* 标签页 */
+        .tabs-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tabs-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+        }
+        
+        .tabs-nav {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 32px;
+            padding: 4px;
+            background: var(--surface-color);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .tab-button:hover:not(.active) {
+            background: var(--surface-hover);
+            color: var(--text-primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--surface-color);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .empty-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 16px;
+            }
+            
+            .book-detail-container {
+                padding: 24px 20px;
+            }
+            
+            .book-header {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                text-align: center;
+            }
+            
+            .book-cover, .cover-placeholder {
+                width: 200px;
+                height: 280px;
+                margin: 0 auto 20px;
+            }
+            
+            .book-meta-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+            
+            .book-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .tabs-nav {
+                flex-direction: column;
+            }
+            
+            .nav-links {
+                gap: 24px;
+            }
+            
+            .nav-links a {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .book-cover, .cover-placeholder {
+                width: 160px;
+                height: 220px;
+            }
+            
+            .book-meta-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .meta-item {
+                padding: 16px;
+            }
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                阅读记录管理
+            </a>
+            <div class="nav-right">
+                <ul class="nav-links">
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="manage.html">管理书籍</a></li>
+                    <li><a href="statistics.html">阅读统计</a></li>
+                </ul>
+                <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">
+                    <div class="theme-toggle-icon sun">☀️</div>
+                    <div class="theme-toggle-icon moon">🌙</div>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <a href="manage.html" class="back-button">
+            <span>←</span>
+            返回书籍管理
+        </a>
+
+        <!-- 书籍详情 -->
+        <div class="book-detail-container">
+            <div class="book-header">
+                <div class="book-cover-section">
+                    <img id="bookCover" class="book-cover" style="display: none;">
+                    <div id="coverPlaceholder" class="cover-placeholder">📖</div>
+                </div>
+                
+                <div class="book-info">
+                    <h1 id="bookTitle" class="book-title">书籍标题</h1>
+                    <p id="bookAuthor" class="book-author">作者</p>
+                    <div id="bookStatus" class="book-status">状态</div>
+                    
+                    <div class="book-rating">
+                        <span class="rating-label">评分</span>
+                        <div id="bookRating" class="rating-stars"></div>
+                    </div>
+                    
+                    <div class="book-actions">
+                        <button class="btn btn-primary" onclick="editBook()">
+                            <span>✏️</span>
+                            编辑书籍
+                        </button>
+                        <button class="btn btn-secondary" onclick="addRecord()">
+                            <span>📝</span>
+                            添加记录
+                        </button>
+                        <button class="btn btn-secondary" onclick="addQuote()">
+                            <span>💬</span>
+                            添加摘抄
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteBook()">
+                            <span>🗑️</span>
+                            删除书籍
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 书籍元数据 -->
+            <div class="book-meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">ISBN</div>
+                    <div id="bookIsbn" class="meta-value">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">出版社</div>
+                    <div id="bookPublisher" class="meta-value">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">出版日期</div>
+                    <div id="bookPublishDate" class="meta-value">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">页数</div>
+                    <div id="bookPages" class="meta-value">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">存放位置</div>
+                    <div id="bookLocation" class="meta-value">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">开始日期</div>
+                    <div id="startDate" class="meta-value">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">完成日期</div>
+                    <div id="endDate" class="meta-value">-</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">阅读天数</div>
+                    <div id="readingDays" class="meta-value">-</div>
+                </div>
+            </div>
+            
+            <!-- 标签 -->
+            <div id="bookTags" class="book-tags"></div>
+            
+            <!-- 描述 -->
+            <div class="book-description">
+                <h3 class="description-title">📝 书籍描述</h3>
+                <p id="bookDescription" class="description-text">暂无描述</p>
+            </div>
+        </div>
+
+        <!-- 标签页容器 -->
+        <div class="tabs-container">
+            <div class="tabs-nav">
+                <button class="tab-button active" onclick="switchTab('records')">
+                    📚 阅读记录
+                </button>
+                <button class="tab-button" onclick="switchTab('quotes')">
+                    💬 精彩摘抄
+                </button>
+            </div>
+            
+            <!-- 阅读记录标签页 -->
+            <div id="recordsTab" class="tab-content active">
+                <div id="recordsList"></div>
+            </div>
+            
+            <!-- 摘抄标签页 -->
+            <div id="quotesTab" class="tab-content">
+                <div id="quotesList"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // 主题切换功能
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // 更新meta标签的theme-color
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeColor) {
+                metaThemeColor.setAttribute('content', newTheme === 'light' ? '#1e40af' : '#1e3a8a');
+            }
+        }
+        
+        // 初始化主题
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            const theme = savedTheme || systemTheme;
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            // 更新meta标签
+            const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (metaThemeColor) {
+                metaThemeColor.setAttribute('content', theme === 'light' ? '#1e40af' : '#1e3a8a');
+            }
+        }
+        
+        // 监听系统主题变化
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                const theme = e.matches ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+        });
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme(); // 初始化主题
+            loadBookDetail();
+            
+            // 注册 Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            }
+        });
+    </script>
+</body>
+</html> 

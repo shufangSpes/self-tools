@@ -4,8 +4,8 @@
   "description": "个人阅读记录管理工具",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1890ff",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
   "orientation": "portrait-primary",
   "icons": [
     {
