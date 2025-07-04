@@ -1,7 +1,8 @@
-const CACHE_NAME = 'reading-records-v1';
+const CACHE_NAME = 'reading-records-v2';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/manage.html',
   '/app.js',
   '/manifest.json',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
