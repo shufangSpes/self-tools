@@ -1,0 +1,21 @@
+{
+  "name": "reading-record-manager",
+  "version": "1.0.0",
+  "description": "一个跨平台的阅读记录管理网页应用",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "antd": "^5.12.8",
+    "@ant-design/icons": "^5.2.6"
+  },
+  "devDependencies": {
+    "vite": "^5.0.8"
+  },
+  "keywords": ["reading", "books", "management", "pwa"],
+  "author": "",
+  "license": "MIT"
+} 

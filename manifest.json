@@ -1,0 +1,27 @@
+{
+  "name": "阅读记录管理",
+  "short_name": "阅读记录",
+  "description": "个人阅读记录管理工具",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1890ff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity", "education"],
+  "lang": "zh-CN",
+  "scope": "/",
+  "related_applications": [],
+  "prefer_related_applications": false
+} 
